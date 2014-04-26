@@ -8,6 +8,7 @@
   "dependencies": {
     "express": "3.4.8",
     "jade": "*",
-    "multiparty": "3.x"
+    "multiparty": "3.x",
+    "mkdirp":"0.x"
   }
 }

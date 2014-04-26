@@ -1,0 +1,15 @@
+html
+  head 
+    title Cheesygrader
+  body
+    h1 Cheesy grader. Version 0.0.1alpha
+    h2 Don't DDOS me, bro!
+    form(method='post', action='/upload', enctype='multipart/form-data')
+      p Your name:
+        input(type='text', name='myname')
+      p Your code: 
+        input(type='file', name='codeupload')
+      p Your output;
+        input(type='file', name='outputupload')
+      button(type=submit) Take my solutions!
+

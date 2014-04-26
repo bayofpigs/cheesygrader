@@ -1,3 +1,3 @@
 Cheesy Grader
 ============= 
-Grades like Pizza, doesn't take like it unfortunately.
+Grades like Pizza, doesn't taste like it unfortunately.

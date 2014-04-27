@@ -6,10 +6,10 @@ html
     h2 Don't DDOS me, bro!
     form(method='post', action='/upload', enctype='multipart/form-data')
       p Your name:
-        input(type='text', name='myname')
+        input#namefield(type='text', name='myname')
       p Your code: 
-        input(type='file', name='codeupload')
+        input#codefield(type='file', name='codeupload')
       p Your output;
-        input(type='file', name='outputupload')
+        input#outputfield(type='file', name='outputupload')
       button(type=submit) Take my solutions!
-
+    button#gopherit Take my solutions! (Ajax style)

@@ -1,4 +1,6 @@
 var fs = require('fs');
+var mkdirp = require('mkdirp');
+
 var express = require('express');
 var multiparty = require('multiparty');
 var http = require('http');
@@ -27,41 +29,85 @@ app.get('/', function(req, res) {
   res.render('index', {});
 });
 
+// Form submit
 app.post('/upload', function(req, res, next) {
   var form = new multiparty.Form();
   var name;
-  var code;
-  var output;
+  var uploaded = 0;
+  var validResponse = false;
 
   form.on('error', next);
-  form.on('close', function() {
-    res.send("Thanks for your response!");
-  });
-
-  form.on('field', function(name, val) {
-    if (name !== 'myname') return;
-    name = val; 
-  });
 
   form.parse(req, function(err, fields, files) {
     console.log(fields);
     console.log(files);
-  });
+    
+    console.log("My name: " + fields.myname[0]);
+    console.log("Code filename: " + files.codeupload[0].originalFilename);
+    console.log("Output filename: " + files.outputupload[0].originalFilename);
 
-  /*
-  form.on('file', function(name, val) {
-    if (!part.filename) return;
-    if (part.name != 'codeupload' && part.name != 'outputupload') return part.resume();
-    if (part.name == 'codeupload') {
-      var tmp_path = file.path;
-      var target_path = './uploads/code/' + Date.getDay() + Date.getMonth() + Date.getFullYear() + '/' +
-        Date.now() + file
-    } else if (part.name == 'outputupload') {
-
+    if ( (fields.myname[0] === '') || 
+      (files.codeupload[0].originalFilename === '') ||
+      (files.outputupload.originalFilename === '')) {
+        console.log("Invalid Response");
+        res.send("Invalid Response"); 
     }
 
+    name = fields.myname[0];
+  
+    var today = new Date();
+    var tmpCodePath = files.codeupload[0].path;
+    var tmpOutputPath = files.outputupload[0].path
+    var codeFileName = files.codeupload[0].originalFilename;
+    var outputFileName = files.outputupload[0].originalFilename;
+    
+    // Get output paths: Based on current date/time to prevent duplicates
+    // and clobbering
+    var codeDir = './uploads/code/' + 
+      today.getDay() + today.getMonth() + today.getFullYear() + '/' ;
+    var outputDir = './uploads/output/' +
+      today.getDay() + today.getMonth() + today.getFullYear() + '/';
+
+    // Make the directories with impunity. TODO: add some checks to see
+    // if the directories actually exist.
+    mkdirp(outputDir, function(err) {
+      if (err) console.error(err);
+      writeOutput();
+    });
+
+    mkdirp(codeDir, function(err) {
+      if (err) console.error(err);
+      writeCode();
+    });
+   
+    // Methods for writing code and output
+    var writeCode = function() {
+      var code_target = codeDir + name + today.getTime() + codeFileName;
+
+      fs.readFile(tmpCodePath, function(err, data) {
+        fs.writeFile(code_target, data, function(err) {
+          uploaded++;
+          if (uploaded == 2) {
+            res.send()
+            res.send("Files received! Thank you, " + name + "!");
+          }
+        });
+      });
+    }
+  
+    var writeOutput = function() {
+      var output_target = outputDir + name + today.getTime() + outputFileName;
+
+      fs.readFile(tmpOutputPath, function(err, data) {
+        fs.writeFile(output_target, data, function(err) {
+          uploaded++;
+          if (uploaded == 2) { 
+            res.send("Files received! Thank you, " + name + "!");
+          }
+        });
+      });
+    }
   });
-  */
 });
 
 app.listen(8080);

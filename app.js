@@ -69,9 +69,9 @@ app.post('/upload', function(req, res, next) {
     // Get output paths: Based on current date/time to prevent duplicates
     // and clobbering
     var codeDir = './uploads/code/' + 
-      today.getDay() + today.getMonth() + today.getFullYear() + '/' ;
+      today.getDate() + today.getMonth() + today.getFullYear() + '/' ;
     var outputDir = './uploads/output/' +
-      today.getDay() + today.getMonth() + today.getFullYear() + '/';
+      today.getDate() + today.getMonth() + today.getFullYear() + '/';
 
     // Make the directories with impunity. TODO: add some checks to see
     // if the directories actually exist.
@@ -86,6 +86,11 @@ app.post('/upload', function(req, res, next) {
     });
    
     // Methods for writing code and output
+    var onSuccessCall = function(path) {
+      console.log("Returning: " + path);
+      res.send(JSON.stringify({path: path}));
+    }
+
     var writeCode = function() {
       var code_target = codeDir + name + today.getTime() + codeFileName;
 
@@ -93,8 +98,7 @@ app.post('/upload', function(req, res, next) {
         fs.writeFile(code_target, data, function(err) {
           uploaded++;
           if (uploaded == 2) {
-            res.send()
-            res.send("Files received! Thank you, " + name + "!");
+            onSuccessCall(code_target);
           }
         });
       });
@@ -107,7 +111,7 @@ app.post('/upload', function(req, res, next) {
         fs.writeFile(output_target, data, function(err) {
           uploaded++;
           if (uploaded == 2) { 
-            res.send("Files received! Thank you, " + name + "!");
+            onSuccessCall(output_target);
           }
         });
       });

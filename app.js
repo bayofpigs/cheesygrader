@@ -91,9 +91,6 @@ app.post('/upload', function(req, res, next) {
       res.send(JSON.stringify({path: path}));
     }
   
-    var writeOutput = function() {
-      var output_target = outputDir + name + today.getTime() + outputFileName;
-
     var writeCode = function() {
       var code_target = codeDir + name + today.getTime() + codeFileName;
 
@@ -105,7 +102,7 @@ app.post('/upload', function(req, res, next) {
           }
         });
       });
-    }
+    };
   
     var writeOutput = function() {
       var output_target = outputDir + name + today.getTime() + outputFileName;
@@ -115,11 +112,12 @@ app.post('/upload', function(req, res, next) {
           uploaded++;
           if (uploaded == 2) { 
             onSuccessCall(output_target);
-            res.send("Files received! Thank you, " + name + "!");
           }
         });
+
       });
-    }
+    };
+
   });
 });
 

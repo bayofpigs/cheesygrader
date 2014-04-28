@@ -29,6 +29,11 @@ app.get('/', function(req, res) {
   res.render('index', {});
 });
 
+app.post('/uploadajax', function(req, res, next) {
+  console.log("Received POST");
+  console.log(req);
+});
+
 // Form submit
 app.post('/upload', function(req, res, next) {
   var form = new multiparty.Form();

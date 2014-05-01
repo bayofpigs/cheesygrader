@@ -19,6 +19,11 @@ $('document').ready(function() {
     var code = document.getElementById('codefield').files[0];
     var output = document.getElementById('outputfield').files[0];
 
+    // if the code or output is bad, run the hell away
+    if (code == undefined || output == undefined) {
+      return;
+    }
+
     var formData = new FormData();
     formData.append("myname", name.val());
     formData.append("codeupload", code);

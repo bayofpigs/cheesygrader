@@ -9,6 +9,7 @@
     "express": "3.4.8",
     "jade": "*",
     "multiparty": "3.x",
-    "mkdirp":"0.x"
+    "mkdirp":"0.x",
+    "connect-flash": "0.x"
   }
 }

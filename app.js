@@ -6,6 +6,8 @@ var multiparty = require('multiparty');
 var http = require('http');
 var path = require('path');
 
+var grade = require('./modules/grader.js');
+
 var app = express();
 
 app.set('port', process.env.PORT || 3000);
@@ -25,6 +27,22 @@ if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
+// Upload success callback function
+var onSuccessfulUpload = function(paths) {
+  // Debug Code
+  // All files will be temporarily compared to this guy.
+  // Read comparison to be added later
+  var TEMPORARY_COMP = "solutions/myTestCase"
+
+  // callback after grader comparison
+  var callback = function(result) {
+    console.log(result);
+  }
+
+  console.log("Returning: " + paths);
+  grade(paths, TEMPORARY_COMP, callback);
+}
+
 app.get('/', function(req, res) {
   res.render('index', {});
 });
@@ -39,6 +57,7 @@ app.post('/upload', function(req, res, next) {
   var form = new multiparty.Form();
   var name;
   var uploaded = 0;
+  var uploadedFiles = {};
   var validResponse = false;
 
   form.on('error', next);
@@ -86,32 +105,33 @@ app.post('/upload', function(req, res, next) {
     });
    
     // Methods for writing code and output
-    var onSuccessCall = function(path) {
-      console.log("Returning: " + path);
-      res.send(JSON.stringify({path: path}));
-    }
+    
   
+    // Write the code to the given output directory
     var writeCode = function() {
       var code_target = codeDir + name + today.getTime() + codeFileName;
 
       fs.readFile(tmpCodePath, function(err, data) {
         fs.writeFile(code_target, data, function(err) {
           uploaded++;
+          uploadedFiles.code = code_target;
           if (uploaded == 2) {
-            onSuccessCall(code_target);
+            onSuccessfulUpload(uploadedFiles);
           }
         });
       });
     };
   
+    // write the output to the given output directory
     var writeOutput = function() {
       var output_target = outputDir + name + today.getTime() + outputFileName;
 
       fs.readFile(tmpOutputPath, function(err, data) {
         fs.writeFile(output_target, data, function(err) {
           uploaded++;
+          uploadedFiles.output = output_target;
           if (uploaded == 2) { 
-            onSuccessCall(output_target);
+            onSuccessfulUpload(uploadedFiles);
           }
         });
 

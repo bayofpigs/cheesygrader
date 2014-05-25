@@ -1,11 +1,15 @@
+// Node builtins
 var fs = require('fs');
-var mkdirp = require('mkdirp');
-
-var express = require('express');
-var multiparty = require('multiparty');
 var http = require('http');
 var path = require('path');
 
+// npm packages
+var mkdirp = require('mkdirp');
+var express = require('express');
+var multiparty = require('multiparty');
+var flash = require('connect-flash');
+
+// Custom modules
 var grade = require('./modules/grader.js');
 
 var app = express();
@@ -14,7 +18,10 @@ app.set('port', process.env.PORT || 3000);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
-// Add a favicon later
+// Configure express
+app.use(express.cookieParser("Doritos are Cheesetastic"));
+app.use(express.session({cookie: {maxAge: 60000}}));
+app.use(flash());
 app.use(express.favicon());
 app.use(express.logger('dev'));
 app.use(express.json());
@@ -27,28 +34,8 @@ if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
-// Upload success callback function
-var onSuccessfulUpload = function(paths) {
-  // Debug Code
-  // All files will be temporarily compared to this guy.
-  // Read comparison to be added later
-  var TEMPORARY_COMP = "solutions/myTestCase"
-
-  // callback after grader comparison
-  var callback = function(result) {
-    if (result) {
-      
-    } else {
-  
-    }
-  }
-
-  console.log("Returning: " + paths);
-  grade(paths, TEMPORARY_COMP, callback);
-}
-
 app.get('/', function(req, res) {
-  res.render('index', {});
+  res.render('index', {'message': req.flash('result')[0]});
 });
 
 app.post('/uploadajax', function(req, res, next) {
@@ -56,7 +43,7 @@ app.post('/uploadajax', function(req, res, next) {
   console.log(req);
 });
 
-// Form submit
+// Form submit: aka callback hell
 app.post('/upload', function(req, res, next) {
   var form = new multiparty.Form();
   var name;
@@ -78,7 +65,11 @@ app.post('/upload', function(req, res, next) {
       (files.codeupload[0].originalFilename === '') ||
       (files.outputupload.originalFilename === '')) {
         console.log("Invalid Response");
-        res.send("Invalid Response"); 
+
+        // Send back an invalid response
+        req.flash("result", "Invalid Response");
+        res.redirect('/'); 
+        return;
     }
 
     name = fields.myname[0];
@@ -109,6 +100,29 @@ app.post('/upload', function(req, res, next) {
     });
    
     // Methods for writing code and output
+    // Upload success callback function
+    var onSuccessfulUpload = function(paths) {
+      // Debug Code
+      // All files will be temporarily compared to this guy.
+      // Read comparison to be added later
+      var TEMPORARY_COMP = "solutions/myTestCase"
+
+      // callback after grader comparison
+      var callback = function(result) {
+        if (result) {
+          req.flash('result', 'Correct answer! Have a cookie.');
+          res.redirect('/');
+        } else {
+          req.flash('result', 'Incorrect answer. Try again.');
+          res.redirect('/');
+        }
+
+        console.log("Sent redirect with result: " + result);
+      }
+
+      console.log("Returning: " + paths);
+      grade(paths, TEMPORARY_COMP, callback);
+    }
     
   
     // Write the code to the given output directory

@@ -36,7 +36,11 @@ var onSuccessfulUpload = function(paths) {
 
   // callback after grader comparison
   var callback = function(result) {
-    console.log(result);
+    if (result) {
+      
+    } else {
+  
+    }
   }
 
   console.log("Returning: " + paths);
